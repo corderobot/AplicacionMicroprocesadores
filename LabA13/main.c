@@ -113,9 +113,8 @@ void configurarBT(void){
 
 
 void main(void) {
-  DisableInterrupts;
-  
   SOPT1_COPT=0; // matamos al chucho
+  EnableInterrupts;
   
   //Serial
   SCIBDL = 0b110101;	// (8MHz)/(9600*16) = 52
@@ -125,14 +124,23 @@ void main(void) {
   ICSTRM = 0x90;
   ICSSC_FTRIM = 1;
   
-  configurarBT();
+  //configurarBT();
 
+  while((SCIS1 & 0b10000000) == 0);
+  SCID = '\n';
+  while((SCIS1 & 0b10000000) == 0);
+  SCID = '\r';
+  
   for(;;) {
-	while((SCIS1 & 0b00100000) == 0);
+	
+  } 
+}
+
+interrupt 17 void BTReceive(void){
+	respuesta = SCIS1;
 	respuesta = SCID;
 	if(respuesta > 64 && respuesta < 91)
 		respuesta = respuesta + 32;
 	while((SCIS1 & 0b10000000) == 0);
 	SCID = respuesta;
-  } 
 }
